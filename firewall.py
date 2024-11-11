@@ -7,6 +7,8 @@
  *
  *************************************************************************************"""
 
+# we have blocked_ips (list) , we check if the packet has source or destination in blocked ips , if yes we drop it = event.hault = true
+
 from pox.core import core
 
 blocked_ips = []
@@ -32,13 +34,15 @@ def block(srcIp, dstIp):
 def unblock(srcIp, dstIp):
     blocked_ips.remove((srcIp, dstIp))
 
+#entry point for SDN-based Firewall, use POX controller framework
+
 def launch(ips = ''):
     # add blocks from CLI
     blocked_ips.append((ip[0], ip[1]) for ip in ips.split(' '))
 
-    # add or remove rules when running POX with py
+   # allow the user to block and unblock IP pairs interactively while the controller is running. 
     core.Interactive.variables['block'] = block
     core.Interactive.variables['unblock'] = unblock
 
-    # add the event handler
+    # add the event handler                     # listener for incoming packets
     core.openflow.addListenerByName("PacketIn", _handle_IP_PacketIn)
